@@ -51,20 +51,13 @@ public class DiaryService {
      */
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void createDiary(LocalDate date, String text) {
-        // 1. open weather map 에서 날씨 데이터 가져오기
-        String weatherData = getWeatherString();
+        // 해당 날짜의 날씨 데이터 가져오기 (이미 DB 에 저장된 데이터 가져오기)
+        DateWeather dateWeather = getDateWeather(date);
 
-        // 2. 받아온 날씨 json 파싱하기
-        Map<String, Object> parseWeather = parseWeather(weatherData);
-
-        // 3. 파싱된 데이터 + 작성한 일기 값을 DB 에 저장하기
+        // 작성한 일기 값을 DB 에 저장하기
         Diary nowDiary = new Diary();
-        nowDiary.setWeather(parseWeather.get("main").toString());
-        nowDiary.setIcon(parseWeather.get("icon").toString());
-        nowDiary.setTemperature((Double) parseWeather.get("temp"));
+        nowDiary.setDateWeather(dateWeather);
         nowDiary.setText(text);
-        nowDiary.setDate(date);
-
         diaryRepository.save(nowDiary);
     }
 
@@ -87,6 +80,22 @@ public class DiaryService {
         dateWeather.setTemperature((double) parseWeather.get("temp"));
 
         return dateWeather;
+    }
+
+    /**
+     * 해당 날짜의 날씨 데이터를 가져오는 메서드
+     */
+    private DateWeather getDateWeather(LocalDate date) {
+        List<DateWeather> dateWeatherListFromDB = dateWeatherRepository.findAllByDate(date);
+
+        if (dateWeatherListFromDB.size() == 0) {
+            // 해당 날짜의 날씨 데이터가 없다면, 새로 api 에서 해당 일의 날씨 데이터를 받아오기
+            // 하지만 지금 사용하는 api 는 과거 날짜의 데이터를 가져오는 것은 "유료"임
+            // 따라서 날씨 데이터가 없다면, 우선 현재의 날씨 데이터를 가져오도록 가정하고 구현
+            return getWeatherFromApi();
+        } else {
+            return dateWeatherListFromDB.get(0);
+        }
     }
 
     /**
