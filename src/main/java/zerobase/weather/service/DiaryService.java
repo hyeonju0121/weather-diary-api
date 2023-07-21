@@ -66,6 +66,16 @@ public class DiaryService {
     }
 
     /**
+     * 해당 날짜의 일기를 수정하는 메서드
+     */
+    public void updateDiary(LocalDate date, String text) {
+        Diary nowDiary = diaryRepository.getFirstByDate(date);
+        nowDiary.setText(text);
+
+        diaryRepository.save(nowDiary);
+    }
+
+    /**
      * open weather map 에서 데이터를 String 으로 받아오는 메서드
      */
     private String getWeatherString() {

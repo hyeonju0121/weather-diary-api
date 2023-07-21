@@ -38,4 +38,11 @@ public class DiaryController {
         return diaryService.readDiaries(startDate, endDate);
     }
 
+    // 해당 날짜의 일기를 수정하기
+    @PutMapping("/update/diary")
+    void updateDiary(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                     @RequestBody String text) {
+        diaryService.updateDiary(date, text);
+    }
+
 }
