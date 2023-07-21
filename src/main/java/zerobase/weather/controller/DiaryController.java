@@ -45,4 +45,10 @@ public class DiaryController {
         diaryService.updateDiary(date, text);
     }
 
+    // 해당 날짜의 일기를 삭제하기
+    @DeleteMapping("/delete/diary")
+    void deleteDiary(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        diaryService.deleteDiary(date);
+    }
+
 }

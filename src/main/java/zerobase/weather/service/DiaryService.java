@@ -76,6 +76,13 @@ public class DiaryService {
     }
 
     /**
+     * 해당 날짜의 일기를 삭제하는 메서드
+     */
+    public void deleteDiary(LocalDate date) {
+        diaryRepository.deleteAllByDate(date);
+    }
+
+    /**
      * open weather map 에서 데이터를 String 으로 받아오는 메서드
      */
     private String getWeatherString() {
