@@ -5,10 +5,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import zerobase.weather.domain.DateWeather;
 import zerobase.weather.domain.Diary;
+import zerobase.weather.repository.DateWeatherRepository;
 import zerobase.weather.repository.DiaryRepository;
 
 import java.io.BufferedReader;
@@ -27,9 +30,20 @@ public class DiaryService {
     private String apiKey;
 
     private final DiaryRepository diaryRepository;
+    private final DateWeatherRepository dateWeatherRepository;
 
-    public DiaryService(DiaryRepository diaryRepository) {
+    public DiaryService(DiaryRepository diaryRepository, DateWeatherRepository dateWeatherRepository) {
         this.diaryRepository = diaryRepository;
+        this.dateWeatherRepository = dateWeatherRepository;
+    }
+
+    /**
+     * 매일 새벽 1시에 날씨 데이터를 저장하는 메서드
+     */
+    @Transactional
+    @Scheduled(cron = "0 0 1 * * *")
+    public void saveWeatherDate() {
+        dateWeatherRepository.save(getWeatherFromApi());
     }
 
     /**
@@ -52,6 +66,27 @@ public class DiaryService {
         nowDiary.setDate(date);
 
         diaryRepository.save(nowDiary);
+    }
+
+    /**
+     * api 에서 현재 날씨 데이터를 가져오는 메서드
+     * @return dateWeather
+     */
+    private DateWeather getWeatherFromApi() {
+        // 1. open weather map 에서 날씨 데이터 가져오기
+        String weatherData = getWeatherString();
+
+        // 2. 받아온 날씨 json 파싱하기
+        Map<String, Object> parseWeather = parseWeather(weatherData);
+
+        // 3. 파싱된 데이터를 DateWeather 객체로 만들기
+        DateWeather dateWeather = new DateWeather();
+        dateWeather.setDate(LocalDate.now());
+        dateWeather.setWeather(parseWeather.get("main").toString());
+        dateWeather.setIcon(parseWeather.get("icon").toString());
+        dateWeather.setTemperature((double) parseWeather.get("temp"));
+
+        return dateWeather;
     }
 
     /**
