@@ -59,6 +59,13 @@ public class DiaryService {
     }
 
     /**
+     * 조회 날짜 기간을 설정하여 일기를 조회하는 메서드
+     */
+    public List<Diary> readDiaries(LocalDate startDate, LocalDate endDate) {
+        return diaryRepository.findAllByDateBetween(startDate, endDate);
+    }
+
+    /**
      * open weather map 에서 데이터를 String 으로 받아오는 메서드
      */
     private String getWeatherString() {

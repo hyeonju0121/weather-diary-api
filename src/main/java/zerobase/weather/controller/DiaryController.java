@@ -25,9 +25,17 @@ public class DiaryController {
         diaryService.createDiary(date, text);
     }
 
-    // 날씨 일기 조회하기
+    // 해당 날짜로 날씨 일기 조회하기
     @GetMapping("/read/diary")
     List<Diary> readDiary(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return diaryService.readDiary(date);
     }
+
+    // 조회 기간을 설정하여 날씨 일기 조회하기
+    @GetMapping("/read/diaries")
+    List<Diary> readDiaries(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return diaryService.readDiaries(startDate, endDate);
+    }
+
 }
